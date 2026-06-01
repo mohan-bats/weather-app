@@ -1,45 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Buggy SF Weather App</title>
-</head>
-<body>
-  <h1>San Francisco Weather</h1>
+// Buggy San Francisco Weather App
 
-  <p id="time">Loading local time...</p>
-  <p id="weather">Loading weather...</p>
+const API_KEY = "YOUR_API_KEY_HERE";
+const city = "San Francisco";
 
-  <script>
-    const city = "San Francisco";
-    const apiKey = "YOUR_API_KEY_HERE";
+function showTime() {
+  // BUG: Shows user's local time instead of San Francisco time
+  const now = new Date();
+  console.log("Local Time:", now.toLocaleTimeString());
+}
 
-    function updateTime() {
-      // Bug: Uses user's local time, not San Francisco time
-      const now = new Date();
-      document.getElementById("time").innerText =
-        "Local Time: " + now.toLocaleTimeString();
-    }
+async function getWeather() {
+  try {
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=imperial`
+    );
 
-    async function getWeather() {
-      // Bug: API URL is missing proper encoding and units may not work
-      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`;
+    const data = await response.json();
 
-      const response = await fetch(url);
+    // BUG: Property typo ("tempp" doesn't exist)
+    const temperature = data.main.tempp;
 
-      // Bug: No error handling if API key is invalid or request fails
-      const data = await response.json();
+    // BUG: Assumes weather array always exists
+    const description = data.weather[0].description;
 
-      // Bug: Typo in property name: "tempp" should be "temp"
-      const temp = data.main.tempp;
+    console.log(
+      `Weather in ${city}: ${temperature}°F, ${description}`
+    );
+  } catch (error) {
+    // BUG: Swallows all errors without useful information
+    console.log("Something went wrong");
+  }
+}
 
-      document.getElementById("weather").innerText =
-        `Weather: ${temp}°F, ${data.weather[0].description}`;
-    }
+showTime();
+setInterval(showTime, 1000);
 
-    updateTime();
-    setInterval(updateTime, 1000);
-
-    getWeather();
-  </script>
-</body>
-</html>
+getWeather();
+setInterval(getWeather, 60000);
