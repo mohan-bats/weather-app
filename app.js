@@ -27,8 +27,8 @@ async function getWeather() {
       `Weather in ${city}: ${temperature}°F, ${description}`
     );
   } catch (error) {
-    // BUG: Swallows all errors without useful information
-    console.log("Something went wrong");
+    console.error("Failed to fetch weather:", error.message);
+    console.error(error);
   }
 }
 
